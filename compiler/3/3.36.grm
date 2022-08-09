@@ -1,0 +1,18 @@
+%%
+
+%term ID | ASSIGN | PLUS | MINUS | AND | EQUAL | EOF
+%nonterm stm | be | ae
+%start stm
+
+%%
+
+stm: ID ASSIGN ae ()
+  | ID ASSIGN be ()
+
+be  : be OR be ()
+    | be AND be ()
+    | ae EQUAL ae ()
+    | ID ()
+
+ae : ae PLUS ae ()
+    | ID ()
