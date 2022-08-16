@@ -13,6 +13,7 @@
 
 %nonterm  exp | program | decs | dec | tydec | vardec | fundec | ty | tyfields | tyfield 
 | lvalue | sequence | multiExp | mExp | op | cop | bop | items | item 
+| arithmetic | comparison | logical | funcall | record | array
 
 
 %pos int
@@ -32,11 +33,13 @@
 %value INT (1)
 %value STRING ("")
 
+%left ASSIGN OF ELSE THEN DO
 %left OR
 %left AND
 %left EQ NEQ GT GE LT LE
 %left PLUS MINUS
 %left TIMES DIVIDE
+%right LBRACK
 
 
 
@@ -73,46 +76,57 @@ lvalue : ID ()
 sequence : LBRACE multiExp RBRACE ()
 
 multiExp : exp ()
-        | exp SEMICOLON multiExp ()
+        | exp SEMICOLON multiExp () 
 
 mExp : exp ()
     | exp COMMA mExp ()
 
-op    : PLUS ()
-      | MINUS ()
-      | DIVIDE ()
-      | TIMES ()
-      
-cop :  EQ ()
-      | NEQ ()
-      | GE ()
-      | GT ()
-      | LE ()
-      | LT ()
-
-bop   : AND ()
-      | OR ()
-
 items : item ()
       | item COMMA items ()
 item : ID EQ exp ()
+record : ID LPAREN items  RPAREN ()
+arithmetic : exp TIMES exp ()
+      | exp DIVIDE exp ()
+      | exp PLUS exp ()
+      | exp MINUS exp ()
 
-exp   : LET decs IN multiExp END ()
-      | lvalue ()
-      | sequence ()
-      | INT ()
-      | STRING ()
-      | MINUS exp %prec MINUS ()
-      | exp op exp ()
-      | exp cop exp ()
-      | exp bop exp ()
-      | ID LBRACE mExp RBRACE ()
-      | ID LPAREN items RPAREN ()
-      | ID LPAREN exp RPAREN OF exp ()
-      | lvalue ASSIGN exp ()
-      | IF exp THEN exp ELSE exp ()
-      | IF exp THEN exp ()
-      | WHILE exp DO exp ()
-      | FOR ID ASSIGN exp TO exp DO exp ()
+comparison : exp EQ exp ()
+      | exp NEQ exp ()
+      | exp GE exp ()
+      | exp GT exp ()
+      | exp LE exp ()
+      | exp LT exp ()
+
+logical : exp AND exp ()
+| exp OR exp ()
+
+funcall : ID LBRACE RBRACE ()
+        | ID LBRACE mExp RBRACE ()
+
+
+
+
+
+exp     
+        : lvalue ()
+        | NIL ()
+        | sequence ()
+        | LBRACE RBRACE ()
+        | INT ()
+        | STRING ()
+        | MINUS exp %prec MINUS ()
+        | funcall ()
+        | arithmetic ()
+        | comparison ()
+        | logical ()
+        | record ()
+        | lvalue ASSIGN exp ()
+        | IF exp THEN exp ELSE exp ()
+        | IF exp THEN exp ()
+        | WHILE exp DO exp ()
+        | FOR ID ASSIGN exp TO exp DO exp ()
+        | LET decs IN multiExp END ()
+        (* | LBRACE exp RBRACE () *)
+
 
       
